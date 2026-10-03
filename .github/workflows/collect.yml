@@ -1,0 +1,88 @@
+name: Collect alcohol catalogue
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      pages_per_brand:
+        description: Open Food Facts pages per brand
+        required: true
+        default: "8"
+  schedule:
+    - cron: "17 2 1 * *"
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12", cache: pip}
+      - run: pip install -e .
+      - run: alcohol-catalog clean-brands
+      - uses: actions/upload-artifact@v4
+        with:
+          name: brand-cleaning
+          path: output/brands_cleaning.csv
+
+  collect:
+    needs: prepare
+    strategy:
+      fail-fast: false
+      matrix:
+        category: [whisky, sake, tequila, gin, rum, liqueur, vodka, brandy]
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12", cache: pip}
+      - run: pip install -e .
+      - uses: actions/download-artifact@v4
+        with: {name: brand-cleaning, path: output}
+      - name: Restore request cache
+        uses: actions/cache@v4
+        with:
+          path: output/cache
+          key: catalog-cache-${{ matrix.category }}-${{ github.run_id }}
+          restore-keys: catalog-cache-${{ matrix.category }}-
+      - run: alcohol-catalog collect --category "${{ matrix.category }}" --pages "${{ inputs.pages_per_brand || '8' }}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: catalog-${{ matrix.category }}
+          path: |
+            output/products_${{ matrix.category }}.csv
+            output/brand_verification_${{ matrix.category }}.csv
+            output/images/${{ matrix.category }}/
+          retention-days: 30
+
+  package:
+    needs: collect
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: {pattern: catalog-*, path: combined, merge-multiple: true}
+      - uses: actions/download-artifact@v4
+        with: {name: brand-cleaning, path: combined}
+      - name: Combine CSV files
+        run: |
+          python - <<'PY'
+          import csv, glob
+          files=sorted(glob.glob('combined/products_*.csv'))
+          rows=[]; fields=[]
+          for p in files:
+              with open(p, encoding='utf-8-sig') as f:
+                  r=csv.DictReader(f); fields=fields or r.fieldnames; rows.extend(r)
+          with open('combined/alcohol_products.csv','w',newline='',encoding='utf-8-sig') as f:
+              w=csv.DictWriter(f,fieldnames=fields); w.writeheader(); w.writerows(rows)
+          PY
+          cd combined && zip -r ../alcohol_catalog_complete.zip .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: alcohol-catalog-complete
+          path: alcohol_catalog_complete.zip
+          retention-days: 30
