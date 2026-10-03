@@ -30,6 +30,18 @@ CSV 使用 UTF-8 BOM 编码，可直接用 Excel 打开。相同产品的不同�
 
 如需显著提高历史产品覆盖率，可以后续增加获得授权的数据源或搜索 API。请先确认相应网站的服务条款及图片再分发许可。
 
+## 品牌官网核验
+
+GitHub Actions 的 **Check brand official websites** 工作流会逐个检索清洗表中的每条品牌记录，并生成 `brand_official_sites.csv`。结果包括原始品牌名、类别、输入文件与行号、搜索词、官网 URL、证据来源和判定说明。
+
+- `official_listed_on_wikidata`：Wikidata 精确匹配品牌实体并列有官网属性。
+- `likely_official_domain`：搜索结果域名包含品牌名，需复核网站运营主体。
+- `possible_official_site` / `ambiguous_candidates`：有品牌相关结果，但搜索资料不足以确认。
+- `no_official_site_found`：这次公开搜索未找到可关联的官网，不代表品牌没有官网。
+- `search_error`：搜索服务请求失败。
+
+每次任务生成 `brand-official-sites-complete` Artifact，内含汇总 CSV、按类别 CSV 和品牌清洗审计表。公开搜索只能给出可复核证据；对不以品牌名注册域名或只使用母公司站点的品牌，仍可能需要人工核验。
+
 ## 本地测试（可选）
 
 ```bash
@@ -39,4 +51,5 @@ pip install -e '.[dev]'
 pytest
 alcohol-catalog clean-brands
 alcohol-catalog collect --category whisky --pages 1
+alcohol-catalog official-sites --category whisky
 ```
