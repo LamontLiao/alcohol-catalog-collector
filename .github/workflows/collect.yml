@@ -3,6 +3,16 @@ name: Collect alcohol catalogue
 on:
   push:
     branches: [main]
+    paths:
+      - 'inputs/**'
+      - 'config/categories.yml'
+      - 'src/alcohol_catalog/brands.py'
+      - 'src/alcohol_catalog/http.py'
+      - 'src/alcohol_catalog/images.py'
+      - 'src/alcohol_catalog/models.py'
+      - 'src/alcohol_catalog/normalize.py'
+      - 'src/alcohol_catalog/pipeline.py'
+      - 'src/alcohol_catalog/sources/**'
   workflow_dispatch:
     inputs:
       pages_per_brand:
