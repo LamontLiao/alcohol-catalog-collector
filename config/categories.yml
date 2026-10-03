@@ -1,0 +1,34 @@
+categories:
+  威士忌:
+    slug: whisky
+    alcohol_type_name: whisky
+    accepted_terms: [whisky, whiskey, bourbon, scotch, rye whiskey, single malt, blended whisky]
+  清酒:
+    slug: sake
+    alcohol_type_name: sake
+    accepted_terms: [sake, nihonshu, junmai, ginjo, daiginjo, honjozo]
+  龙舌兰:
+    slug: tequila
+    alcohol_type_name: agave_spirit
+    accepted_terms: [tequila, mezcal, agave spirit, raicilla, sotol]
+  金酒:
+    slug: gin
+    alcohol_type_name: gin
+    accepted_terms: [gin, london dry gin, genever, old tom gin]
+  朗姆酒:
+    slug: rum
+    alcohol_type_name: rum
+    accepted_terms: [rum, rhum, ron, cachaça, cachaca]
+  利口酒:
+    slug: liqueur
+    alcohol_type_name: liqueur
+    accepted_terms: [liqueur, cream liqueur, amaro, bitter, aperitif, cordial]
+  伏特加:
+    slug: vodka
+    alcohol_type_name: vodka
+    accepted_terms: [vodka]
+  白兰地:
+    slug: brandy
+    alcohol_type_name: brandy
+    accepted_terms: [brandy, cognac, armagnac, pisco, grappa, eau-de-vie]
+
